@@ -1,1 +1,4 @@
-# nodejs-course
+### Install dependancies
+`yarn` 
+### Scripts
+- `yarn simpleNumbers`
