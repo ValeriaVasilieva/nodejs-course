@@ -1,0 +1,15 @@
+{
+  "name": "nodejs-course",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ValeriaVasilieva/nodejs-course.git",
+  "author": "Valeron <Lerok.vasil@outlook.com>",
+  "license": "MIT",
+  "scripts": {
+    "simpleNumbers": "node ./homework-1/index.js",
+    "readData": "node ./homework-3/index.js"
+  },
+  "devDependencies": {
+    "colors": "^1.4.0"
+  }
+}
