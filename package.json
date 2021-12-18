@@ -6,7 +6,8 @@
   "author": "Valeron <Lerok.vasil@outlook.com>",
   "license": "MIT",
   "scripts": {
-    "simpleNumbers": "node ./homework-1/index.js"
+    "simpleNumbers": "node ./homework-1/index.js",
+    "readData": "node ./homework-3/index.js"
   },
   "devDependencies": {
     "colors": "^1.4.0"
