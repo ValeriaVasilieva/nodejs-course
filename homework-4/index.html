@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script
+      src="https://cdn.socket.io/3.1.3/socket.io.min.js"
+      integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: sans-serif;
+
+        --border-radius: 15px;
+      }
+      .container {
+        max-width: 1024px;
+        margin: 0 auto;
+        height: 100vh;
+        padding: 3%;
+      }
+      .auth-box {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+      }
+      .auth-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        padding: 0 10%;
+      }
+      .auth-input {
+        height: 30px;
+        max-width: 250px;
+        width: 80%;
+        border-radius: var(--border-radius);
+        padding: 0 10px;
+        border: 1px solid teal;
+        margin-bottom: 10px;
+      }
+      .auth-input:focus {
+        outline: none;
+        border: 2px solid teal;
+      }
+      .connect-button {
+        max-width: 250px;
+        width: 80%;
+        height: 30px;
+        border: none;
+        border-radius: var(--border-radius);
+        background-color: teal;
+        text-transform: uppercase;
+        color: white;
+      }
+      .message-box {
+        width: 100%;
+        margin-top: 2%;
+        padding: 10px;
+      }
+      .message-div {
+        display: flex;
+        align-items: center;
+      }
+      .name {
+        color: darkslateblue;
+        padding-right: 2%;
+        width: 55px;
+      }
+      .message {
+        margin: 3px 0;
+        color: black;
+      }
+      .message-form {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+      #input {
+        height: 30px;
+        width: 75%;
+        border-radius: var(--border-radius);
+        padding: 0 10px;
+        border: 1px solid teal;
+      }
+      #input:focus {
+        outline: none;
+        border: 2px solid teal;
+      }
+      #button {
+        width: 20%;
+        height: 30px;
+        border: none;
+        border-radius: var(--border-radius);
+        background-color: teal;
+        text-transform: uppercase;
+        color: white;
+      }
+      .online-box {
+        padding-left: 10px;
+        font-size: 13px;
+      }
+      .error {
+        color: red;
+        margin-bottom: 2%;
+        font-size: 12px;
+      }
+      .hide {
+        display: none;
+      }
+    </style>
+    <div class="container">
+      <div class="auth-box">
+        <form class="auth-form">
+          <input
+            class="auth-input"
+            name="name"
+            type="text"
+            placeholder="name"
+            autocomplete="off"
+          />
+          <input
+            class="auth-input"
+            name="password"
+            type="text"
+            placeholder="password"
+            autocomplete="off"
+          />
+          <p class="hide error">Неверное имя или пароль пользователя</p>
+          <p class="hide error online">Вы ужe вошли с другого устройства</p>
+          <button class="connect-button">Connect</button>
+        </form>
+      </div>
+      <div class="message-box hide">
+        <form class="message-form">
+          <input id="input" type="text" autofocus autocomplete="off" />
+          <button id="button">Send</button>
+        </form>
+        <div class="online-box">
+          Сейчас в сети <span class="count"></span> человек:
+          <span class="online-persons"></span>
+        </div>
+        <div id="messages" class="message-box"></div>
+      </div>
+    </div>
+
+    <script>
+      const socket = io(`localhost:5555`)
+      // const socket = io(`http://192.168.88.25:9003/`)
+
+      const input = document.querySelector("#input")
+      const messageForm = document.querySelector(".message-form")
+      const messagesBlock = document.querySelector("#messages")
+      const authForm = document.querySelector(".auth-form")
+      const nameInput = document.querySelector(".auth-form")
+      const passwordInput = document.querySelector(".auth-form")
+      const error = document.querySelector(".error")
+      const messageBox = document.querySelector(".message-box")
+      const authBox = document.querySelector(".auth-box")
+      const onlineBox = document.querySelector(".online-box")
+      const count = document.querySelector(".count")
+      const onlinePersons = document.querySelector(".online-persons")
+      const onlineError = document.querySelector(".online")
+
+      messageForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+        const data = {
+          message: input.value,
+        }
+        socket.emit("client-msg", data)
+        input.value = ""
+      })
+
+      authForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+        error.classList.add("hide")
+        const formData = new FormData(authForm)
+        let data = {}
+        for (key of formData.keys()) {
+          if (formData.get(key)) {
+            data[key] = formData.get(key)
+          } else {
+            error.classList.remove("hide")
+            return
+          }
+        }
+        socket.emit("new-client", data)
+      })
+
+      // socket.on("connect", () => {
+      //   console.log("connected", socket)
+      // })
+
+      socket.on("auth-good", (name) => {
+        messageBox.classList.remove("hide")
+        authBox.classList.add("hide")
+        messagesBlock.insertAdjacentHTML(
+          "afterbegin",
+          `<p class="message" style="color:teal">${name} присоединился к нашей тусовке<p>`
+        )
+      })
+
+      socket.on("attention-new-client", (name) => {
+        messagesBlock.insertAdjacentHTML(
+          "afterbegin",
+          `<p class="message" style="color:teal">${name} присоединился к нашей тусовке<p>`
+        )
+      })
+
+      socket.on("auth-bad", (data) => {
+        if (data === "online") {
+          onlineError.classList.remove("hide")
+          error.classList.add("hide")
+        }
+        if (data === "uncorrect") {
+          error.classList.remove("hide")
+          onlineError.classList.add("hide")
+        }
+        messageBox.classList.add("hide")
+        authBox.classList.remove("hide")
+      })
+
+      socket.on("server-msg", (data) => {
+        messagesBlock.insertAdjacentHTML(
+          "afterbegin",
+          `<div class='message-div'><p class='name'>${data.name}:</p><p class="message">${data.message}</p></div>`
+        )
+      })
+
+      socket.on("someone-leave", (name) => {
+        if (name) {
+          messagesBlock.insertAdjacentHTML(
+            "afterbegin",
+            `<p class="message" style="color:purple">${name} ушел<p>`
+          )
+        }
+      })
+
+      socket.on("update-online-clients", (clients) => {
+        count.textContent = clients.length.toString()
+        onlinePersons.textContent = clients.join(", ")
+      })
+    </script>
+  </body>
+</html>

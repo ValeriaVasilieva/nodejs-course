@@ -1,0 +1,17 @@
+{
+  "name": "nodejs-course",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ValeriaVasilieva/nodejs-course.git",
+  "author": "Valeron <Lerok.vasil@outlook.com>",
+  "license": "MIT",
+  "scripts": {
+    "serve": "nodemon homework-4/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "http-proxy": "^1.18.1",
+    "nodemon": "^2.0.15",
+    "socket.io": "^4.4.0"
+  }
+}
